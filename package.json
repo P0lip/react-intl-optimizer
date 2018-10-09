@@ -17,8 +17,8 @@
   "license": "MIT",
   "author": "P0lip",
   "files": [
-    "bin",
-    "dist",
+    "webpack.js",
+    "babel.js",
     "README.md"
   ],
   "repository": {
