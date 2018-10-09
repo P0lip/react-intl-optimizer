@@ -1,0 +1,51 @@
+{
+  "name": "react-intl-optimizer",
+  "version": "0.0.0",
+  "description": "Hassle-free react-intl messages file optimization",
+  "keywords": [
+    "react",
+    "react-intl",
+    "intl"
+  ],
+  "homepage": "https://github.com/P0lip/react-intl-optimizer/",
+  "bugs": {
+    "url": "https://github.com/P0lip/react-intl-optimizer/issues"
+  },
+  "engines": {
+    "node": ">=8.9.0"
+  },
+  "license": "MIT",
+  "author": "P0lip",
+  "files": [
+    "bin",
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/P0lip/react-intl-optimizer.git"
+  },
+  "scripts": {
+    "build": "NODE_ENV=production rollup -c",
+    "lint": "eslint --cache --cache-location .cache/ src/",
+    "test": "exit 0",
+    "prepublish": "yarn lint && yarn test && yarn build"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/core": "7.1.2",
+    "@babel/plugin-external-helpers": "7.0.0",
+    "@babel/plugin-proposal-object-rest-spread": "7.0.0",
+    "@babel/plugin-syntax-dynamic-import": "7.0.0",
+    "@babel/plugin-transform-modules-commonjs": "7.1.0",
+    "@babel/preset-env": "7.1.0",
+    "babel-core": "^7.0.0-0",
+    "babel-eslint": "10.0.1",
+    "babel-plugin-dynamic-import-node": "2.1.0",
+    "eslint": "^5.6.1",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.11.0",
+    "rollup": "^0.66.4",
+    "rollup-plugin-babel": "4.0.3"
+  }
+}
