@@ -1,3 +1,16 @@
+import { getActualId } from '../mangler/utils';
+import { SUBSCRIBER_NAME } from '../consts';
+
+export const fileMessages = new WeakMap();
+
+const addMessage = (file, messageId) => {
+  if (fileMessages.has(file)) {
+    fileMessages.get(file).push(messageId);
+  } else {
+    fileMessages.set(file, [messageId]);
+  }
+};
+
 export const isValidMessagesShape = (node) => {
   if (!node.isObjectExpression()) {
     return false;
@@ -17,11 +30,11 @@ export const isValidMessagesShape = (node) => {
         continue;
       }
 
-      if (prop.get('key').node.name === 'defaultMessage') {
+      if (prop.get('key').isIdentifier({ name: 'defaultMessage' })) {
         continue;
       }
 
-      if (prop.get('key').node.name === 'id' && prop.get('value').isStringLiteral() && typeof prop.get('value').node.value === 'string') {
+      if (prop.get('key').isIdentifier({ name: 'id' }) && prop.get('value').isStringLiteral()) {
         continue;
       }
 
@@ -34,18 +47,20 @@ export const isValidMessagesShape = (node) => {
   return true;
 };
 
-export function getMessages(node, messages = []) {
-  for (const prop of node.get('properties')) {
-    if (prop.isObjectExpression()) {
-      getMessages(prop, messages);
-    } else if (prop.isObjectProperty()) {
-      if (prop.isObjectExpression()) {
-        getMessages(prop.get('value'), messages);
-      } else if (prop.get('key').node.name === 'id') {
-        messages.push(String(prop.get('value').node.value));
-      }
-    }
-  }
+export const messagesObjectVisitor = {
+  ObjectProperty(path) {
+    const { mangleMap = null } = global[SUBSCRIBER_NAME] || {};
 
-  return messages;
-}
+    if (path.get('key').isIdentifier({ name: 'id' })) {
+      const valueNode = path.get('value').node;
+      const { value } = valueNode;
+      const actualId = getActualId(mangleMap, value);
+
+      if (actualId !== value) {
+        valueNode.value = actualId;
+      }
+
+      addMessage(this.file, actualId);
+    }
+  },
+};

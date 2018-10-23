@@ -23,7 +23,7 @@ Your Webpack config
 Babel plugin traverses all ObjectExpression nodes in order to find messages object.
 When a matching object is found, it extracts useful data (such as IDs) and assigns it to file's context, which is read and processed by Webpack plugin later on.
 Once bundle is about to be emitted, we slice the languages to separate files and make some optimization.
-Each language file can be accessed un `messages/{langCode}.json`.
+Each language file can be accessed at `messages/{langCode}.json`.
 
 ## Features
 
@@ -37,6 +37,17 @@ By default, react-intl-optimizer does not remove unused message pairs, as it's s
 
 * add some documentation
 * tests
+
+
+## Caveats
+
+* No dynamic ID resolution
+* No multiple threads support
+
+
+## Kudos
+
+
 
 ## LICENSE
 

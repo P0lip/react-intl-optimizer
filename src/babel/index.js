@@ -1,22 +1,33 @@
-import { isValidMessagesShape, getMessages } from './utils';
+import {
+  isValidMessagesShape,
+  messagesObjectVisitor,
+  fileMessages,
+} from './utils';
+import { METADATA_NAME } from '../consts';
 
-const MESSAGES = Symbol('ReactIntlMessages');
-
-// eslint-disable-next-line no-unused-vars
-export default function ({ types: t }) {
+export default function () {
   return {
     post(file) {
-      file.metadata['react-intl'] = file[MESSAGES];
+      const messages = fileMessages.get(file);
+
+      if (messages !== undefined) {
+        file.metadata[METADATA_NAME] = messages;
+      }
     },
 
     visitor: {
-      ObjectExpression(path, state) {
+      CallExpression(path, { file }) {
+        const callee = path.get('callee');
+
+        if (callee.referencesImport('react-intl', 'defineMessages')) {
+          path.traverse(messagesObjectVisitor, { file });
+          path.skip();
+        }
+      },
+
+      ObjectExpression(path, { file }) {
         if (isValidMessagesShape(path)) {
-          if (state.file[MESSAGES] !== undefined) {
-            state.file[MESSAGES].push(...getMessages(path));
-          } else {
-            state.file[MESSAGES] = getMessages(path);
-          }
+          path.traverse(messagesObjectVisitor, { file });
         }
       },
     },
