@@ -12,7 +12,7 @@
     "url": "https://github.com/P0lip/react-intl-optimizer/issues"
   },
   "engines": {
-    "node": ">=8.9.0"
+    "node": ">=8"
   },
   "license": "MIT",
   "author": "P0lip",
@@ -40,17 +40,18 @@
   "devDependencies": {
     "@babel/core": "7.1.2",
     "@babel/plugin-external-helpers": "7.0.0",
-    "@babel/plugin-syntax-dynamic-import": "7.0.0",
-    "@babel/plugin-transform-modules-commonjs": "7.1.0",
     "@babel/preset-env": "7.1.0",
     "babel-core": "^7.0.0-0",
     "babel-eslint": "10.0.1",
     "babel-loader": "8.0.4",
-    "babel-plugin-dynamic-import-node": "2.1.0",
+    "chai": "4.2.0",
     "eslint": "^5.6.1",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.11.0",
+    "esm": "3.0.84",
     "husky": "1.1.2",
+    "mocha": "5.2.0",
+    "randomstring": "1.1.5",
     "rollup": "^0.66.4",
     "rollup-plugin-babel": "4.0.3",
     "webpack": "4.21.0",

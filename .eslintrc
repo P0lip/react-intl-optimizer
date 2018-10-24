@@ -1,14 +1,27 @@
 {
-  "parser": "babel-eslint",
+  "parserOptions": {
+    "ecmaVersion": 2017,
+    "sourceType": "module"
+  },
   "extends": "airbnb-base",
   "rules": {
     "no-param-reassign": "warn",
-    "function-paren-newline": "off",
     "no-restricted-syntax": "off",
-    "class-methods-use-this": "off",
-    "import/prefer-default-export": "off",
+    "function-paren-newline": "off",
     "import/no-dynamic-require": "warn",
     "global-require": "warn",
     "no-continue": "off"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["src/**/*.test.js"],
+      "parserOptions": {
+        "ecmaVersion": 2018,
+        "sourceType": "script"
+      },
+      "env": {
+        "mocha": true
+      }
+    }
+  ]
 }
