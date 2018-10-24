@@ -27,7 +27,7 @@
   },
   "scripts": {
     "build": "NODE_ENV=production rollup -c",
-    "lint": "eslint --cache --cache-location .cache/ src/",
+    "lint": "eslint --cache --cache-location .cache/ src/ tests/",
     "webpack": "webpack-cli",
     "test": "exit 0",
     "prepublish": "yarn lint && yarn test && yarn build",
@@ -49,6 +49,7 @@
     "eslint": "^5.6.1",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.11.0",
+    "husky": "1.1.2",
     "rollup": "^0.66.4",
     "rollup-plugin-babel": "4.0.3",
     "webpack": "4.21.0",
