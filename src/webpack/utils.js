@@ -8,11 +8,12 @@ export function createReplacer(whitelist, foundIds) {
   };
 }
 
-export function mangleMessagesObj(messages, mangleMap) {
-  for (const [key, value] of Object.entries(messages)) {
-    if (mangleMap.has(key)) {
-      delete messages[key];
-      messages[mangleMap.get(key)] = value;
+export function renameMessageKeys(messages, idMap) {
+  for (const [id, prevId] of idMap.entries()) {
+    if (prevId in messages) {
+      const value = messages[prevId];
+      delete messages[prevId];
+      messages[id] = value;
     }
   }
 

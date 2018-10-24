@@ -34,7 +34,7 @@
     "postpublish": "rm babel.js && rm.webpack.js"
   },
   "dependencies": {
-    "uniqid": "5.0.3"
+    "@sindresorhus/fnv1a": "1.0.0"
   },
   "devDependencies": {
     "@babel/core": "7.1.2",

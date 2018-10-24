@@ -16,18 +16,18 @@ export default function () {
     },
 
     visitor: {
-      CallExpression(path, { file }) {
+      CallExpression(path, { file, opts }) {
         const callee = path.get('callee');
 
         if (callee.referencesImport('react-intl', 'defineMessages')) {
-          path.traverse(messagesObjectVisitor, { file });
+          path.traverse(messagesObjectVisitor, { file, opts });
           path.skip();
         }
       },
 
-      ObjectExpression(path, { file }) {
+      ObjectExpression(path, { file, opts }) {
         if (isValidMessagesShape(path)) {
-          path.traverse(messagesObjectVisitor, { file });
+          path.traverse(messagesObjectVisitor, { file, opts });
         }
       },
     },

@@ -1,6 +1,5 @@
-import { createReplacer, mangleMessagesObj } from './utils';
+import { createReplacer, renameMessageKeys } from './utils';
 import { SUBSCRIBER_NAME, METADATA_NAME } from '../consts';
-import { MangleMap } from '../mangler/mangler';
 
 class ReactIntlOptimizer {
   constructor({
@@ -19,43 +18,41 @@ class ReactIntlOptimizer {
 
   apply(compiler) {
     const {
-      mangle,
-      unsafeMangling,
       removeUnused = false,
       whitelist = [],
     } = this.optimization;
+
+    const idMap = new Map();
 
     const allMessagesIDs = removeUnused
       ? new Set()
       : null;
 
-    const mangleMap = mangle
-      ? new MangleMap(whitelist)
-      : null;
-
-    compiler.hooks.beforeRun.tapAsync(ReactIntlOptimizer.name, (compilation, callback) => {
-      // todo: let's try to avoid such exposure...
-      // prepare mangle map aot and just pass it as an option to babel-loader
-      global[ReactIntlOptimizer.metadataContextFunctionName] = {
-        mangleMap,
-      };
-
-      callback();
-    });
-
-    if (removeUnused) {
-      compiler.hooks.compilation.tap(ReactIntlOptimizer.name, (compilation) => {
-        compilation.hooks.normalModuleLoader.tap(ReactIntlOptimizer.name, (context) => {
-          context[ReactIntlOptimizer.metadataContextFunctionName] = (metadata) => {
-            if (metadata[METADATA_NAME] !== undefined) {
-              for (const id of metadata[METADATA_NAME]) {
+    compiler.hooks.compilation.tap(ReactIntlOptimizer.name, (compilation) => {
+      compilation.hooks.normalModuleLoader.tap(ReactIntlOptimizer.name, (context) => {
+        context[ReactIntlOptimizer.metadataContextFunctionName] = (metadata) => {
+          if (metadata[METADATA_NAME] !== undefined) {
+            for (const [id, prevId] of metadata[METADATA_NAME]) {
+              if (removeUnused) {
                 allMessagesIDs.add(id);
               }
+
+              if (prevId !== id) {
+                // let's check for a potential collision to avoid any nasty situation
+                // while the collision rate is low, it still may happen
+                // and since no mangler is in use, it's better to be prepared
+                const existingId = idMap.get(id);
+                if (existingId !== undefined && existingId !== prevId) {
+                  throw new Error('Collision happened. Please turn off ID minification.');
+                }
+
+                idMap.set(id, prevId);
+              }
             }
-          };
-        });
+          }
+        };
       });
-    }
+    });
 
     compiler.hooks.emit.tapAsync(ReactIntlOptimizer.name, (compilation, callback) => {
       const replacer = createReplacer(
@@ -66,8 +63,8 @@ class ReactIntlOptimizer {
       for (const [langKey, allMessages] of Object.entries(this.messages)) {
         let messages = allMessages;
 
-        if (mangle) {
-          messages = mangleMessagesObj(messages, mangleMap);
+        if (idMap.size > 0) {
+          messages = renameMessageKeys({ ...messages }, idMap);
         }
 
         const jsonString = JSON.stringify(messages, replacer);

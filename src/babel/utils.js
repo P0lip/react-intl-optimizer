@@ -1,13 +1,12 @@
-import { getActualId } from '../mangler/utils';
-import { SUBSCRIBER_NAME } from '../consts';
+import fnv1a from '@sindresorhus/fnv1a';
 
 export const fileMessages = new WeakMap();
 
-const addMessage = (file, messageId) => {
+const addMessage = (file, messageId, prevMessageId) => {
   if (fileMessages.has(file)) {
-    fileMessages.get(file).push(messageId);
+    fileMessages.get(file).push([messageId, prevMessageId]);
   } else {
-    fileMessages.set(file, [messageId]);
+    fileMessages.set(file, [[messageId, prevMessageId]]);
   }
 };
 
@@ -49,18 +48,18 @@ export const isValidMessagesShape = (node) => {
 
 export const messagesObjectVisitor = {
   ObjectProperty(path) {
-    const { mangleMap = null } = global[SUBSCRIBER_NAME] || {};
-
     if (path.get('key').isIdentifier({ name: 'id' })) {
       const valueNode = path.get('value').node;
       const { value } = valueNode;
-      const actualId = getActualId(mangleMap, value);
 
-      if (actualId !== value) {
+      let actualId = value;
+
+      if (this.opts.minifyIDs) {
+        actualId = String(fnv1a(actualId));
         valueNode.value = actualId;
       }
 
-      addMessage(this.file, actualId);
+      addMessage(this.file, actualId, value);
     }
   },
 };
