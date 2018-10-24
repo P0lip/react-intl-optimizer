@@ -1,3 +1,4 @@
+import { RawSource } from 'webpack-sources';
 import { createReplacer, renameMessageKeys } from './utils';
 import { SUBSCRIBER_NAME, METADATA_NAME } from '../consts';
 
@@ -64,17 +65,14 @@ class ReactIntlOptimizer {
         let messages = allMessages;
 
         if (idMap.size > 0) {
-          messages = renameMessageKeys({ ...messages }, idMap);
+          messages = renameMessageKeys(Object.assign({}, messages), idMap);
         }
 
-        const jsonString = JSON.stringify(messages, replacer);
+        const stringifiedMessages = JSON.stringify(messages, replacer);
 
         const filename = this.output(langKey);
 
-        compilation.assets[filename] = {
-          source: () => jsonString,
-          size: () => jsonString.length,
-        };
+        compilation.assets[filename] = new RawSource(stringifiedMessages);
       }
 
       callback();
