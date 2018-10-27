@@ -1,0 +1,5 @@
+--require esm
+--ui bdd
+--slow
+--reporter dot
+--allow-uncaught
