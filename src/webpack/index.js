@@ -36,6 +36,8 @@ class ReactIntlOptimizer {
   apply(compiler) {
     const idMap = new Map();
 
+    const shouldOptimize = compiler.options.mode === 'production';
+
     const {
       messages,
       defaultLanguage,
@@ -47,79 +49,83 @@ class ReactIntlOptimizer {
       },
     } = this;
 
-    const allMessagesIDs = removeUnused
+    const allMessagesIDs = shouldOptimize && removeUnused
       ? new Set()
       : null;
 
-    compiler.hooks.compilation.tap(ReactIntlOptimizer.name, (compilation) => {
-      compilation.hooks
-        .buildModule
-        .tap(ReactIntlOptimizer.name, (module) => {
-          module.useSourceMap = true;
-        });
+    if (shouldOptimize) {
+      compiler.hooks.compilation.tap(ReactIntlOptimizer.name, (compilation) => {
+        compilation.hooks
+          .buildModule
+          .tap(ReactIntlOptimizer.name, (module) => {
+            module.useSourceMap = true;
+          });
 
-      compilation.hooks.optimizeChunkAssets.tapAsync(
-        ReactIntlOptimizer.name,
-        (chunks, callback) => {
-          Promise.all(this.prepareChunks(compilation, chunks).map(async (file) => {
-            const asset = compilation.assets[file];
-            const { source, map } = asset.sourceAndMap();
+        compilation.hooks.optimizeChunkAssets.tapAsync(
+          ReactIntlOptimizer.name,
+          (chunks, callback) => {
+            Promise.all(this.prepareChunks(compilation, chunks).map(async (file) => {
+              const asset = compilation.assets[file];
+              const { source, map } = asset.sourceAndMap();
 
-            const result = await optimize(
-              source,
-              {
-                sourceFileName: file,
-                inputSourceMap: map,
-              },
-              {
-                inlineDefaultLanguage,
-                minifyIDs,
-                whitelist,
-                messages: messages[defaultLanguage],
-              },
-            );
+              const result = await optimize(
+                source,
+                {
+                  sourceFileName: file,
+                  inputSourceMap: map,
+                },
+                {
+                  inlineDefaultLanguage,
+                  minifyIDs,
+                  whitelist,
+                  messages: messages[defaultLanguage],
+                },
+              );
 
-            if (result.metadata[METADATA_NAME] !== undefined) {
-              for (const [id, prevId] of result.metadata[METADATA_NAME]) {
-                if (removeUnused) {
-                  allMessagesIDs.add(id);
-                }
-
-                if (prevId !== id) {
-                  // let's check for a potential collision to avoid any nasty situation
-                  // while the collision rate is low, it still may happen
-                  // and since no mangler is in use, it's better to be prepared
-                  const existingId = idMap.get(id);
-                  if (existingId !== undefined && existingId !== prevId) {
-                    throw new Error('Collision happened. Please turn off ID minification.');
+              if (result.metadata[METADATA_NAME] !== undefined) {
+                for (const [id, prevId] of result.metadata[METADATA_NAME]) {
+                  if (removeUnused) {
+                    allMessagesIDs.add(id);
                   }
 
-                  idMap.set(id, prevId);
+                  if (prevId !== id) {
+                    // let's check for a potential collision to avoid any nasty situation
+                    // while the collision rate is low, it still may happen
+                    // and since no mangler is in use, it's better to be prepared
+                    const existingId = idMap.get(id);
+                    if (existingId !== undefined && existingId !== prevId) {
+                      throw new Error('Collision happened. Please turn off ID minification.');
+                    }
+
+                    idMap.set(id, prevId);
+                  }
                 }
               }
-            }
 
-            compilation.assets[file] = new SourceMapSource(
-              result.code,
-              file,
-              result.map,
-              source.code,
-              source.map,
-            );
-          }))
-            .then(() => callback())
-            .catch(callback);
-        });
-    });
+              compilation.assets[file] = new SourceMapSource(
+                result.code,
+                file,
+                result.map,
+                source.code,
+                source.map,
+              );
+            }))
+              .then(() => callback())
+              .catch(callback);
+          });
+      });
+    }
 
     compiler.hooks.emit.tapAsync(ReactIntlOptimizer.name, (compilation, callback) => {
       for (const [langKey, allMessages] of Object.entries(messages)) {
-        const replacer = createReplacer(
-          whitelist,
-          defaultLanguage === langKey ? new Set() : allMessagesIDs,
-        );
+        const replacer = shouldOptimize
+          ? createReplacer(
+            whitelist,
+            inlineDefaultLanguage && defaultLanguage === langKey ? new Set() : allMessagesIDs,
+          )
+          : null;
 
-        if (idMap.size > 0) {
+        if (shouldOptimize && idMap.size > 0) {
           renameMessageKeys(allMessages, idMap);
         }
 
