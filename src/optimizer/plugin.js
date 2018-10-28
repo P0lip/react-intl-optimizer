@@ -1,11 +1,11 @@
 import {
   isValidMessagesShape,
-  messagesObjectVisitor,
   fileMessages,
+  messagesVisitor,
 } from './utils';
 import { METADATA_NAME } from '../consts';
 
-export default function () {
+export default function ({ types: t }) {
   return {
     post(file) {
       const messages = fileMessages.get(file);
@@ -19,15 +19,16 @@ export default function () {
       CallExpression(path, { file, opts }) {
         const callee = path.get('callee');
 
-        if (callee.referencesImport('react-intl', 'defineMessages')) {
-          path.traverse(messagesObjectVisitor, { file, opts });
-          path.skip();
+        if (callee.node.name === 'defineMessages') {
+          path.get('arguments.0').traverse(messagesVisitor, { file, opts, t });
+          path.stop();
         }
       },
 
       ObjectExpression(path, { file, opts }) {
         if (isValidMessagesShape(path)) {
-          path.traverse(messagesObjectVisitor, { file, opts });
+          path.parentPath.traverse(messagesVisitor, { file, opts, t });
+          path.stop();
         }
       },
     },

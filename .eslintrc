@@ -9,18 +9,26 @@
     "no-restricted-syntax": "off",
     "function-paren-newline": "off",
     "import/no-dynamic-require": "warn",
+    "import/prefer-default-export": "off",
     "global-require": "warn",
     "no-continue": "off"
   },
   "overrides": [
     {
-      "files": ["src/**/*.test.js"],
+      "files": ["src/**/*.test.js", "tests/**/*.test.js"],
       "parserOptions": {
         "ecmaVersion": 2018,
-        "sourceType": "script"
+        "sourceType": "module"
       },
       "env": {
         "mocha": true
+      },
+      "plugins": [
+        "chai-friendly"
+      ],
+      "rules": {
+        "no-unused-expressions": 0,
+        "chai-friendly/no-unused-expressions": 2
       }
     }
   ]

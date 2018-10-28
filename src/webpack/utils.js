@@ -16,6 +16,4 @@ export function renameMessageKeys(messages, idMap) {
       messages[id] = value;
     }
   }
-
-  return messages;
 }

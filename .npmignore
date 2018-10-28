@@ -3,3 +3,4 @@ coverage/
 node_modules/
 .cache/
 yarn-error.log
+tests/

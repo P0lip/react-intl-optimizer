@@ -1,5 +1,5 @@
 --require esm
+--require ./tests/test-helpers.js
 --ui bdd
 --slow
---reporter dot
 --allow-uncaught

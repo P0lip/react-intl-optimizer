@@ -1,10 +1,11 @@
 {
   "name": "react-intl-optimizer",
   "version": "0.1.0",
-  "description": "Hassle-free react-intl messages file optimization",
+  "description": "Hassle-free react-intl messages optimization",
   "keywords": [
     "react",
     "react-intl",
+    "minifier",
     "intl"
   ],
   "homepage": "https://github.com/P0lip/react-intl-optimizer/",
@@ -16,11 +17,7 @@
   },
   "license": "MIT",
   "author": "P0lip",
-  "files": [
-    "webpack.js",
-    "babel.js",
-    "README.md"
-  ],
+  "main": "dist/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/P0lip/react-intl-optimizer.git"
@@ -29,31 +26,34 @@
     "build": "NODE_ENV=production rollup -c",
     "lint": "eslint --cache --cache-location .cache/ src/ tests/",
     "webpack": "webpack-cli",
-    "test": "exit 0",
-    "prepublish": "yarn lint && yarn test && yarn build",
-    "postpublish": "rm babel.js && rm.webpack.js"
+    "test": "mocha --opts mocha.opts ./src/**/*.test.js ./tests/**/*.test.js",
+    "prepublish": "yarn lint && yarn test && yarn build"
   },
   "dependencies": {
+    "@babel/core": "7.1.2",
     "@sindresorhus/fnv1a": "1.0.0",
     "webpack-sources": "1.3.0"
   },
   "devDependencies": {
-    "@babel/core": "7.1.2",
-    "@babel/plugin-external-helpers": "7.0.0",
     "@babel/preset-env": "7.1.0",
     "babel-core": "^7.0.0-0",
     "babel-eslint": "10.0.1",
     "babel-loader": "8.0.4",
+    "babel-plugin-tester": "5.5.1",
     "chai": "4.2.0",
     "eslint": "^5.6.1",
     "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-chai-friendly": "0.4.1",
     "eslint-plugin-import": "^2.11.0",
     "esm": "3.0.84",
     "husky": "1.1.2",
     "mocha": "5.2.0",
+    "prop-types": "15.6.2",
     "randomstring": "1.1.5",
+    "react-intl": "2.7.2",
     "rollup": "^0.66.4",
     "rollup-plugin-babel": "4.0.3",
+    "uglifyjs-webpack-plugin": "2.0.1",
     "webpack": "4.21.0",
     "webpack-cli": "3.1.2"
   }

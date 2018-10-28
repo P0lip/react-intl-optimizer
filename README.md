@@ -6,48 +6,153 @@
 yarn add --dev react-intl-optimizer
 ```
 
+or if npm is your package manager
+
+```sh
+npm install --save-dev react-intl-optimizer
+```
+
+## Description
+
+react-intl-optimizer optimizes the messages and its usage.
+
 ## Usage
 
-.babelrc
-
-```json
-```
-
-Your Webpack config
+Make sure to import the plugin
 
 ```js
+const ReactIntlOptimizer = require('react-intl-optimizer');
 ```
 
-## How does it work?
+Then, in your plugins configuration, add an equivalent entry with setup of your choice.
+Note that presence of messages is required. All optimizations are opt-in and disabled by default.
 
-Babel plugin traverses all ObjectExpression nodes in order to find messages object.
-When a matching object is found, it extracts useful data (such as IDs) and assigns it to file's context, which is read and processed by Webpack plugin later on.
-Once bundle is about to be emitted, we slice the languages to separate files and make some optimization.
-Each language file can be accessed at `messages/{langCode}.json`.
+```js
+plugins: [
+  new ReactIntlOptimizer({
+    messages: require('./messages.json'),
+    optimization: {}, // may be skipped
+  }),
+],
+```
 
-## Features
+## Options
 
-### keepUnused
+### messages
 
-If you have a large translation file, containing plenty of IDs/values, it's more than likely that some of them are just not used anywhere in the app.
-React-intl-optimizer is able to get rid of such unused messages making the final bundle smaller.
-By default, react-intl-optimizer does not remove unused message pairs, as it's still a WIP and may lead to missing messages.
+Source of your messages. Accepted format:
 
-## TODO:
+```
+{
+  [language: string]: {
+    [key: string]: {
+       id: string,
+       defaultMessage?: string,
+       description?: string,
+    }
+  }
+}
+```
 
-* add some documentation
-* tests
+#### Example:
 
+```json
+{
+  "en": {
+    "id_foo_0": "Foo",
+    "id_bar_0": "Bar",
+  },
+  "jp": {
+    "id_foo_0": "Foo",
+    "id_bar_0": "Bar",
+  }
+}
+```
+
+### chunkName
+
+If you used named splitChunks, you can provide a name to speed up the build time.
+If undefined, all chunks are processed.
+Both regexp and plain string value are accepted.
+
+### defaultLanguage
+
+Default language in your app. For now it's used only by optimization.inlineDefaultLanguage.
+
+### output
+
+Allows you to set custom output path.
+
+#### Default:
+```js
+langKey => `messages/${langKey}.json`
+```
+
+#### Example:
+
+```js
+new ReactIntlOptimizer({
+  messages: require('./messages.json'),
+  output: langKey => `static/messages/${langKey}.json`,
+});
+```
+
+langKey is optional and might be undefined if optimization.sliceLanguages is not enabled.
+
+### optimization
+
+For example output, please refer to tests.
+
+### optimization.inlineDefaultLanguage
+
+Inlines default messages into given message descriptor. defaultLanguage must be provided.
+It may speed up boot time, since no request for languages might be needed.
+
+### optimization.removeUnused
+
+Removes unused message descriptors.
+If you have a large translation file, containing plenty of IDs/values, it's more than likely that some of them are just not referenced anywhere in the app.
+react-intl-optimizer is able to get rid of such unused pairs making the final bundle smaller.
+Keep in mind that if you whitelist IDs, they will occur in the final bundle.
+
+### optimization.minifyIDs
+
+Minifies message descriptor's id. Useful when your messages file have message descriptors with lengthy IDs.
+
+### optimization.splitLanguages
+
+Currently, there is no way to disable that optimization, but its support will be added soon.
+
+Splits languages to separate files. Useful when you have lots of languages containing plenty of message descriptors.
+
+### optimization.whitelist
+
+#### Default
+
+`[]`
+
+Disallows the following optimizations for matching IDs.
+
+* removeUnused
+* minifyIDs
+
+#### Example
+
+```js
+new ReactIntlOptimizer({
+  messages: require('./messages.json'),
+  optimization: {
+    removeUnused: true,
+    whitelist: ['id_foo_0'],
+  },
+});
+```
+
+`id_foo_0` won't be removed and minified.
 
 ## Caveats
 
 * No dynamic ID resolution
-* No multiple threads support
-
-
-## Kudos
-
-
 
 ## LICENSE
 
