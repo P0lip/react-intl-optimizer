@@ -1,0 +1,23 @@
+{
+  "en": {
+    "cancel": "Cancel",
+    "abort": "Abort",
+    "continue": "Continue",
+    "delete": "Delete",
+    "send_now": "Send now",
+    "send_later": "Send later",
+    "bad_request": "Bad request",
+    "forbidden": "Forbidden",
+    "not_found": "Not found"
+  },
+  "pl": {
+    "cancel": "Anuluj",
+    "abort": "Wstrzymaj",
+    "delete": "Usuń",
+    "send_now": "Wyślij teraz",
+    "send_later": "Wyślij później",
+    "bad_request": "Bad request",
+    "forbidden": "Forbidden",
+    "not_found": "Not found"
+  }
+}
