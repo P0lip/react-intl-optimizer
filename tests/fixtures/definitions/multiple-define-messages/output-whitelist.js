@@ -19,7 +19,7 @@ export const errors = defineMessages({
     "defaultMessage": "Not found"
   },
   [ERROR_CONSTS.UNDEFINED]: {
-    id: "2606869827"
+    id: 'undefined'
   }
 });
 export default defineMessages({

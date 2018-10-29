@@ -2,6 +2,7 @@ import { SourceMapSource, RawSource } from 'webpack-sources';
 import { createReplacer, renameMessageKeys } from './utils';
 import { METADATA_NAME } from '../consts';
 import optimize from '../optimizer/index';
+import { IdMap } from '../optimizer/id-map';
 
 class ReactIntlOptimizer {
   constructor({
@@ -36,18 +37,18 @@ class ReactIntlOptimizer {
   apply(compiler) {
     const idMap = new Map();
 
-    const shouldOptimize = compiler.options.mode === 'production';
-
     const {
       messages,
       defaultLanguage,
+      optimization,
       optimization: {
         inlineDefaultLanguage = false,
         removeUnused = false,
-        minifyIDs = false,
         whitelist = [],
       },
     } = this;
+
+    const shouldOptimize = compiler.options.mode === 'production';
 
     const allMessagesIDs = shouldOptimize && removeUnused
       ? new Set()
@@ -76,7 +77,7 @@ class ReactIntlOptimizer {
                 },
                 {
                   inlineDefaultLanguage,
-                  minifyIDs,
+                  idMap: new IdMap(messages, defaultLanguage, optimization),
                   whitelist,
                   messages: messages[defaultLanguage],
                 },
@@ -88,6 +89,8 @@ class ReactIntlOptimizer {
                     allMessagesIDs.add(id);
                   }
 
+                  idMap.set(id, prevId);
+
                   if (prevId !== id) {
                     // let's check for a potential collision to avoid any nasty situation
                     // while the collision rate is low, it still may happen
@@ -96,8 +99,6 @@ class ReactIntlOptimizer {
                     if (existingId !== undefined && existingId !== prevId) {
                       throw new Error('Collision happened. Please turn off ID minification.');
                     }
-
-                    idMap.set(id, prevId);
                   }
                 }
               }

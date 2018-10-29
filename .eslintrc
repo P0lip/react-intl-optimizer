@@ -11,7 +11,9 @@
     "import/no-dynamic-require": "warn",
     "import/prefer-default-export": "off",
     "global-require": "warn",
-    "no-continue": "off"
+    "no-continue": "off",
+    "no-labels": "off",
+    "no-label-var": "off"
   },
   "overrides": [
     {

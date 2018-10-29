@@ -42,6 +42,7 @@ module.exports = {
       optimization: {
         inlineDefaultLanguage: true,
         minifyIDs: true,
+        mergeDuplicates: true,
         removeUnused: true,
       },
     }),

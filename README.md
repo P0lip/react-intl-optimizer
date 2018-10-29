@@ -115,6 +115,65 @@ If you have a large translation file, containing plenty of IDs/values, it's more
 react-intl-optimizer is able to get rid of such unused pairs making the final bundle smaller.
 Keep in mind that if you whitelist IDs, they will occur in the final bundle.
 
+### optimization.mergeDuplicates
+
+Merges equal message descriptors.
+
+#### Example
+
+```json
+{
+  "en": {
+    "id_foo_0": "Foo",
+    "id_bar_0": "Foo",
+  },
+  "jp": {
+    "id_foo_0": "Foo",
+    "id_bar_0": "Foo",
+  }
+}
+```
+
+is transformed to
+
+```json
+{
+  "en": {
+    "id_foo_0": "Foo",
+  },
+  "jp": {
+    "id_foo_0": "Foo",
+  }
+}
+```
+
+and the IDs in messages definitions are rewritten to match.
+
+```js
+defineMessages({
+  Foo: {
+    id: "id_foo_0",
+  },
+  Bar: {
+    id: "id_bar_0",
+  }
+}
+```
+
+is transformed to
+
+```js
+defineMessages({
+  Foo: {
+    id: "id_foo_0",
+  },
+  Bar: {
+    id: "id_foo_0",
+  }
+}
+```
+
+
 ### optimization.minifyIDs
 
 Minifies message descriptor's id. Useful when your messages file have message descriptors with lengthy IDs.

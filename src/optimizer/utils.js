@@ -1,5 +1,3 @@
-import fnv1a from '@sindresorhus/fnv1a';
-
 export const fileMessages = new WeakMap();
 
 const addMessage = (file, messageId, prevMessageId) => {
@@ -48,27 +46,7 @@ export const isValidMessagesShape = (node) => {
   return true;
 };
 
-const minify = (node) => {
-  const newId = String(fnv1a(node.value));
-  node.value = newId;
-
-  return newId;
-};
-
-function getID(path) {
-  return path.node.value;
-}
-
-function processIdPath(path, { opts: { minifyIDs, whitelist }, file }) {
-  const initialId = getID(path);
-  let actualId = initialId;
-
-  if (minifyIDs && !whitelist.includes(actualId)) {
-    actualId = minify(path.node);
-  }
-
-  addMessage(file, actualId, initialId);
-}
+const getID = path => path.node.value;
 
 function inlineMessage(path, { t }, message) {
   const defaultMessageNode = path
@@ -96,6 +74,7 @@ export const messagesVisitor = {
       opts: {
         inlineDefaultLanguage,
         messages,
+        idMap,
       },
     } = this;
 
@@ -104,13 +83,19 @@ export const messagesVisitor = {
     const idNode = properties.find(prop => prop.get('key').isIdentifier({ name: 'id' }));
     if (idNode) {
       const idNodeValue = idNode.get('value');
-      const id = getID(idNodeValue);
+      const initialId = getID(idNodeValue);
+      const newId = idMap.get(initialId);
 
-      if (inlineDefaultLanguage && id in messages) {
-        inlineMessage(path, this, messages[id]);
+      // todo: shall we respect whitelist here?
+      if (inlineDefaultLanguage && initialId in messages) {
+        inlineMessage(path, this, messages[initialId]);
       }
 
-      processIdPath(idNodeValue, this);
+      if (initialId !== newId) {
+        idNodeValue.node.value = newId;
+      }
+
+      addMessage(this.file, newId, initialId);
       path.stop();
     }
   },

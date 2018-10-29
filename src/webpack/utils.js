@@ -17,3 +17,29 @@ export function renameMessageKeys(messages, idMap) {
     }
   }
 }
+
+function sortLanguages(messages) {
+  const langauges = Object.entries(messages);
+  langauges.sort(([, setA], [, setB]) => Object.values(setB).length - Object.values(setA).length);
+  return langauges;
+}
+
+export function listDuplicates(messages) {
+  const [firstLanguage, ...languages] = sortLanguages(messages);
+  const duplicates = new Set();
+
+  messages:
+  for (const [id, value] of Object.entries(firstLanguage[1])) {
+    for (const [, languageMessages] of languages) {
+      const message = languageMessages[id];
+
+      if (message === undefined || message !== value) {
+        continue messages;
+      }
+    }
+
+    duplicates.add(id);
+  }
+
+  return duplicates;
+}

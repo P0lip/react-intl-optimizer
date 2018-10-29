@@ -16,7 +16,7 @@ export const errors = defineMessages({
     id: "2687396305"
   },
   [ERROR_CONSTS.UNDEFINED]: {
-    id: "2606869827"
+    id: 'undefined'
   }
 });
 export default defineMessages({

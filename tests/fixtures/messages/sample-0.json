@@ -8,7 +8,9 @@
     "send_later": "Send later",
     "bad_request": "Bad request",
     "forbidden": "Forbidden",
-    "not_found": "Not found"
+    "not_found": "Not found",
+    "missing": "Not found",
+    "error_404": "Not found"
   },
   "pl": {
     "cancel": "Anuluj",
@@ -18,6 +20,14 @@
     "send_later": "Wyślij później",
     "bad_request": "Bad request",
     "forbidden": "Forbidden",
-    "not_found": "Not found"
-  }
+    "not_found": "Nie znaleziono",
+    "missing": "Nie znaleziono",
+    "error_404": "Nie znaleziono"
+  },
+  "de": {
+    "missing": "Not found",
+    "not_found": "Not found",
+    "error_404": "Not found"
+  },
+  "nl": {}
 }
