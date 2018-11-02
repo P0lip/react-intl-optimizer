@@ -12,6 +12,16 @@ module.exports = {
   },
   optimization: {
     minimizer: [
+      new ReactIntlOptimizer({
+        messages: require('../fixtures/messages/sample-0'),
+        defaultLanguage: 'en',
+        optimization: {
+          inlineDefaultLanguage: true,
+          minifyIDs: true,
+          mergeDuplicates: true,
+          removeUnused: true,
+        },
+      }),
       new UglifyJsPlugin({
         uglifyOptions: {
           mangle: true,
@@ -21,6 +31,27 @@ module.exports = {
         sourceMap: true,
       }),
     ],
+    splitChunks: {
+      chunks: 'async',
+      minSize: 1000,
+      minChunks: 2,
+      maxAsyncRequests: 5,
+      maxInitialRequests: 3,
+      automaticNameDelimiter: '~',
+      name: true,
+      cacheGroups: {
+        vendors: {
+          test: /react-intl/,
+          name: 'react-intl',
+          priority: -10
+        },
+        default: {
+          minChunks: 2,
+          priority: -20,
+          reuseExistingChunk: true
+        }
+      }
+    },
   },
   module: {
     rules: [
@@ -36,16 +67,7 @@ module.exports = {
     ],
   },
   plugins: [
-    new ReactIntlOptimizer({
-      messages: require('../fixtures/messages/sample-0'),
-      defaultLanguage: 'en',
-      optimization: {
-        inlineDefaultLanguage: true,
-        minifyIDs: true,
-        mergeDuplicates: true,
-        removeUnused: true,
-      },
-    }),
+
   ],
   externals: {
     react: 'react',

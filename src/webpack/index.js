@@ -7,12 +7,21 @@ import { IdMap } from '../optimizer/id-map';
 class ReactIntlOptimizer {
   constructor({
     messages,
+    languages,
     chunkName,
     optimization = {},
     defaultLanguage,
     output = langKey => `messages/${langKey}.json`,
   }) {
-    this.messages = JSON.parse(JSON.stringify(messages));
+    this.messages = languages !== undefined
+      ? languages.reduce((obj, language) => {
+        if (language in messages) {
+          obj[language] = Object.assign({}, messages[language]);
+        }
+
+        return obj;
+      }, {})
+      : JSON.parse(JSON.stringify(messages));
     this.optimization = optimization;
     this.chunkName = chunkName;
     this.defaultLanguage = defaultLanguage;

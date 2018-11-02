@@ -75,6 +75,34 @@ If you used named splitChunks, you can provide a name to speed up the build time
 If undefined, all chunks are processed.
 Both regexp and plain string value are accepted.
 
+### languages
+
+Array of languages used in the app.
+Make sure to include every language you need, as only the provided ones will be included in the final bundle.
+A single language entry must match the top-level JSON key property.
+
+#### Example
+
+Given such JSON
+```
+{
+  de: {},
+  en: {},
+  pl: {},
+}
+```
+
+and such a config
+
+```js
+new ReactIntlOptimizer({
+  messages: require('./messages.json'),
+  languages: ['de', 'pl'],
+});
+```
+
+English gets removed from the final bundle.
+
 ### defaultLanguage
 
 Default language in your app. For now it's used only by optimization.inlineDefaultLanguage.
