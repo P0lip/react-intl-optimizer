@@ -9,5 +9,16 @@
         "modules": false
       }
     ]
-  ]
+  ],
+  "env": {
+    "test": {
+      "plugins": [
+        ["istanbul", {
+          "exclude": [
+            "**/*.test.js"
+          ]
+        }]
+      ]
+    }
+  }
 }
