@@ -2,10 +2,84 @@ import { expect } from 'chai';
 import randomstring from 'randomstring';
 import {
   createReplacer,
+  initialReviver,
   renameMessageKeys,
 } from './utils';
 
 describe('webpack/utils', () => {
+  describe('initialReviver', () => {
+    let messages;
+
+    beforeEach(() => {
+      messages = {
+        en: { a: 'b' },
+        pl: { c: 'd' },
+        de: {},
+      };
+    });
+
+    it('should always keep empty key', () => {
+      const revive = initialReviver(void 0, '', {});
+
+      expect(revive('', messages))
+        .to.equal(messages);
+    });
+
+    context('when languages are defined', () => {
+      it('should filter out any un-matching language', () => {
+        const languages = ['de', 'pl'];
+        const revive = initialReviver(languages, '', {});
+
+        expect(revive('en', messages.en))
+          .to.be.undefined;
+      });
+
+      it('should keep a default language', () => {
+        const languages = ['de', 'pl'];
+        const revive = initialReviver(languages, 'en', {});
+
+        expect(revive('en', messages.en))
+          .to.equal(messages.en);
+      });
+
+      it('should keep found language', () => {
+        const languages = ['de', 'pl'];
+        const revive = initialReviver(languages, '', {});
+
+        expect(revive('de', messages.de))
+          .to.equal(messages.de);
+      });
+    });
+
+    context('when optimization.removeValues is an array', () => {
+      it('should drop a property if its value is found in array', () => {
+        const value = randomstring.generate();
+        const revive = initialReviver(void 0, '', { removeValues: [value] });
+
+        expect(revive('foo', value))
+          .to.be.undefined;
+      });
+
+      it('should keep a property if its value is not found in array', () => {
+        const value = randomstring.generate();
+        const revive = initialReviver(void 0, '', { removeValues: ['test'] });
+
+        expect(revive('foo', value))
+          .to.be.equal(value);
+      });
+    });
+
+    context('when optimization.trimWhitespaces is truthy', () => {
+      it('should trim any string value', () => {
+        const value = randomstring.generate();
+        const revive = initialReviver(void 0, '', { trimWhitespaces: true });
+
+        expect(revive('foo', `   ${value}  `))
+          .to.equal(value);
+      });
+    });
+  });
+
   describe('createReplacer', () => {
     it('allows key to be empty', () => {
       const replacer = createReplacer([], null);
@@ -74,14 +148,14 @@ describe('webpack/utils', () => {
 
   describe('renameMessageKeys', () => {
     it('replaces existing property if its key is found in idMap', () => {
-      const KEY = randomstring.generate();
+      const OLD_KEY = randomstring.generate();
       const NEW_KEY = randomstring.generate();
       const messages = {
         foo: 'bar',
-        [KEY]: 'baz',
+        [OLD_KEY]: 'baz',
       };
 
-      const idMap = new Map([[NEW_KEY, KEY]]);
+      const idMap = new Map([[OLD_KEY, NEW_KEY]]);
       renameMessageKeys(messages, idMap);
 
       expect(messages)

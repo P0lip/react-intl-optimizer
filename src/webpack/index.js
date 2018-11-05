@@ -1,5 +1,7 @@
 import { SourceMapSource, RawSource } from 'webpack-sources';
-import { createReplacer, generateChecksum, renameMessageKeys } from './utils';
+import {
+  createReplacer, generateChecksum, initialReviver, renameMessageKeys,
+} from './utils';
 import { METADATA_NAME } from '../consts';
 import optimize from '../optimizer/index';
 import { IdMap } from '../optimizer/id-map';
@@ -13,15 +15,11 @@ class ReactIntlOptimizer {
     defaultLanguage,
     output = langKey => `messages/${langKey}.json`,
   }) {
-    this.messages = languages !== undefined
-      ? languages.reduce((obj, language) => {
-        if (language in messages) {
-          obj[language] = Object.assign({}, messages[language]);
-        }
+    this.messages = JSON.parse(JSON.stringify(
+      messages,
+      initialReviver(languages, defaultLanguage, optimization),
+    ));
 
-        return obj;
-      }, {})
-      : JSON.parse(JSON.stringify(messages));
     this.optimization = optimization;
     this.chunkName = chunkName;
     this.defaultLanguage = defaultLanguage;
@@ -44,8 +42,6 @@ class ReactIntlOptimizer {
   }
 
   apply(compiler) {
-    const idMap = new Map();
-
     const {
       messages,
       defaultLanguage,
@@ -57,6 +53,7 @@ class ReactIntlOptimizer {
       },
     } = this;
 
+    const idMap = new IdMap(messages, defaultLanguage, optimization);
     const shouldOptimize = compiler.options.mode === 'production';
     const manifest = {};
 
@@ -87,28 +84,16 @@ class ReactIntlOptimizer {
                 },
                 {
                   inlineDefaultLanguage,
-                  idMap: new IdMap(messages, defaultLanguage, optimization),
+                  idMap,
                   whitelist,
                   messages: messages[defaultLanguage],
                 },
               );
 
               if (result.metadata[METADATA_NAME] !== undefined) {
-                for (const [id, prevId] of result.metadata[METADATA_NAME]) {
-                  if (removeUnused) {
+                for (const [id] of result.metadata[METADATA_NAME]) {
+                  if (allMessagesIDs !== null) {
                     allMessagesIDs.add(id);
-                  }
-
-                  idMap.set(id, prevId);
-
-                  if (prevId !== id) {
-                    // let's check for a potential collision to avoid any nasty situation
-                    // while the collision rate is low, it still may happen
-                    // and since no mangler is in use, it's better to be prepared
-                    const existingId = idMap.get(id);
-                    if (existingId !== undefined && existingId !== prevId) {
-                      throw new Error('Collision happened. Please turn off ID minification.');
-                    }
                   }
                 }
               }

@@ -143,6 +143,34 @@ If you have a large translation file, containing plenty of IDs/values, it's more
 react-intl-optimizer is able to get rid of such unused pairs making the final bundle smaller.
 Keep in mind that if you whitelist IDs, they will occur in the final bundle.
 
+### optimization.removeValues
+
+Exclude any matching messages from final bundle.
+Note, an array of strings must be provided.
+
+#### Example
+
+given `removeValues: ['N/A']`
+
+```json
+{
+  "en": {
+    "id_foo_0": "N/A",
+    "id_bar_0": "Foo"
+  },
+}
+```
+
+is transformed to
+
+```json
+{
+  "en": {
+    "id_foo_0": "Foo"
+  },
+}
+```
+
 ### optimization.mergeDuplicates
 
 Merges equal message descriptors.
@@ -153,11 +181,11 @@ Merges equal message descriptors.
 {
   "en": {
     "id_foo_0": "Foo",
-    "id_bar_0": "Foo",
+    "id_bar_0": "Foo"
   },
   "jp": {
     "id_foo_0": "Foo",
-    "id_bar_0": "Foo",
+    "id_bar_0": "Foo"
   }
 }
 ```
@@ -167,10 +195,10 @@ is transformed to
 ```json
 {
   "en": {
-    "id_foo_0": "Foo",
+    "id_foo_0": "Foo"
   },
   "jp": {
-    "id_foo_0": "Foo",
+    "id_foo_0": "Foo"
   }
 }
 ```
@@ -201,10 +229,13 @@ defineMessages({
 }
 ```
 
-
 ### optimization.minifyIDs
 
 Minifies message descriptor's id. Useful when your messages file have message descriptors with lengthy IDs.
+
+### optimization.trimWhitespaces
+
+Trims all trailing whitespaces in translations.
 
 ### optimization.splitLanguages
 

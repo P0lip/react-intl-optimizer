@@ -1,9 +1,49 @@
 import * as crypto from 'crypto';
 
-export function createReplacer(whitelist, foundIds) {
+export function initialReviver(languages, defaultLanguage, optimization) {
   return (key, value) => {
-    if (key === '' || foundIds === null || foundIds.has(key) || whitelist.includes(key)) {
+    if (key === '') {
       return value;
+    }
+
+    switch (typeof value) {
+      case 'object':
+        if (key === defaultLanguage) {
+          return value;
+        }
+
+        if (languages !== void 0 && !languages.includes(key)) {
+          return void 0;
+        }
+
+        break;
+      case 'string':
+        if (optimization.removeValues !== void 0 && optimization.removeValues.includes(value)) {
+          return void 0;
+        }
+
+        if (optimization.trimWhitespaces) {
+          return value.trim();
+        }
+
+        break;
+      default:
+    }
+
+    return value;
+  };
+}
+
+export function createReplacer(whitelist, foundIds, trimWhitespaces) {
+  return (key, value) => {
+    if (key === '' || typeof value !== 'string') {
+      return value;
+    }
+
+    if (foundIds === null || foundIds.has(key) || whitelist.includes(key)) {
+      return trimWhitespaces
+        ? value.trim()
+        : value;
     }
 
     return undefined;
@@ -11,11 +51,11 @@ export function createReplacer(whitelist, foundIds) {
 }
 
 export function renameMessageKeys(messages, idMap) {
-  for (const [id, prevId] of idMap.entries()) {
-    if (prevId in messages) {
-      const value = messages[prevId];
-      delete messages[prevId];
-      messages[id] = value;
+  for (const [oldId, newId] of idMap.entries()) {
+    if (oldId in messages) {
+      const value = messages[oldId];
+      delete messages[oldId];
+      messages[newId] = value;
     }
   }
 }
