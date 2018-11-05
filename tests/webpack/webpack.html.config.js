@@ -1,5 +1,6 @@
 const path = require('path');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ReactIntlOptimizer = require('../../dist');
 
 module.exports = {
@@ -12,16 +13,6 @@ module.exports = {
   },
   optimization: {
     minimizer: [
-      new ReactIntlOptimizer({
-        messages: require('../fixtures/messages/sample-0'),
-        defaultLanguage: 'en',
-        optimization: {
-          inlineDefaultLanguage: true,
-          minifyIDs: true,
-          mergeDuplicates: true,
-          removeUnused: true,
-        },
-      }),
       new UglifyJsPlugin({
         uglifyOptions: {
           mangle: true,
@@ -67,6 +58,21 @@ module.exports = {
     ],
   },
   plugins: [
+    new HtmlWebpackPlugin({
+      inject: true,
+      template: 'index.html',
+    }),
+    new ReactIntlOptimizer({
+      messages: require('../fixtures/messages/sample-0'),
+      defaultLanguage: 'en',
+      optimization: {
+        inlineDefaultLanguage: true,
+        minifyIDs: true,
+        mergeDuplicates: true,
+        removeUnused: true,
+      },
+    }),
+
 
   ],
   externals: {

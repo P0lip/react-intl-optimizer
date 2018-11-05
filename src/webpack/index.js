@@ -1,5 +1,5 @@
 import { SourceMapSource, RawSource } from 'webpack-sources';
-import { createReplacer, renameMessageKeys } from './utils';
+import { createReplacer, generateChecksum, renameMessageKeys } from './utils';
 import { METADATA_NAME } from '../consts';
 import optimize from '../optimizer/index';
 import { IdMap } from '../optimizer/id-map';
@@ -58,13 +58,14 @@ class ReactIntlOptimizer {
     } = this;
 
     const shouldOptimize = compiler.options.mode === 'production';
+    const manifest = {};
 
     const allMessagesIDs = shouldOptimize && removeUnused
       ? new Set()
       : null;
 
-    if (shouldOptimize) {
-      compiler.hooks.compilation.tap(ReactIntlOptimizer.name, (compilation) => {
+    compiler.hooks.compilation.tap(ReactIntlOptimizer.name, (compilation) => {
+      if (shouldOptimize) {
         compilation.hooks
           .buildModule
           .tap(ReactIntlOptimizer.name, (module) => {
@@ -123,10 +124,32 @@ class ReactIntlOptimizer {
               .then(() => callback())
               .catch(callback);
           });
-      });
-    }
+      }
 
-    compiler.hooks.emit.tapAsync(ReactIntlOptimizer.name, (compilation, callback) => {
+      if (compilation.hooks.htmlWebpackPluginAlterAssetTags !== undefined) {
+        compilation.hooks
+          .htmlWebpackPluginAlterAssetTags
+          .tapAsync(ReactIntlOptimizer.name, ({ head }, callback) => {
+            if (Array.isArray(head)) {
+              head.unshift({
+                tagName: 'script',
+                closeTag: true,
+                attributes: {
+                  type: 'text/javascript',
+                },
+                innerHTML: `;var __REACT_INTL_OPTIMIZER__=${JSON.stringify(manifest)};`,
+              });
+            }
+
+            callback();
+          });
+      }
+    });
+
+    compiler.hooks.emit.tapAsync({
+      name: ReactIntlOptimizer.name,
+      before: 'HtmlWebpackPlugin',
+    }, (compilation, callback) => {
       for (const [langKey, allMessages] of Object.entries(messages)) {
         const replacer = shouldOptimize
           ? createReplacer(
@@ -140,9 +163,21 @@ class ReactIntlOptimizer {
         }
 
         const stringifiedMessages = JSON.stringify(allMessages, replacer);
-        const filename = this.output(langKey);
+        const filename = this.output(langKey); // todo: pass use output.publicPath
+        manifest[langKey] = {
+          path: filename,
+          empty: stringifiedMessages === '{}',
+          checksum: shouldOptimize
+            ? generateChecksum(stringifiedMessages)
+            : undefined,
+        };
 
         compilation.assets[filename] = new RawSource(stringifiedMessages);
+      }
+
+      if (compilation.hooks.htmlWebpackPluginAlterAssetTags === undefined) {
+        const filename = this.output('manifest.json'); // todo: pass use output.publicPath
+        compilation.assets[filename] = new RawSource(manifest);
       }
 
       callback();

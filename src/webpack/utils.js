@@ -1,3 +1,5 @@
+import * as crypto from 'crypto';
+
 export function createReplacer(whitelist, foundIds) {
   return (key, value) => {
     if (key === '' || foundIds === null || foundIds.has(key) || whitelist.includes(key)) {
@@ -42,4 +44,12 @@ export function listDuplicates(messages) {
   }
 
   return duplicates;
+}
+
+
+export function generateChecksum(str) {
+  return crypto
+    .createHash('md5')
+    .update(str, 'utf8')
+    .digest('hex');
 }

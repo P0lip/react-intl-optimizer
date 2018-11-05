@@ -4,3 +4,5 @@ node_modules/
 yarn-error.log
 dist/
 .nyc_output
+client.js
+client.js.map

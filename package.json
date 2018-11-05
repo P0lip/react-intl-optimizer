@@ -28,7 +28,8 @@
     "webpack": "webpack-cli",
     "test": "NODE_ENV=test mocha --opts mocha.opts ./src/**/*.test.js ./tests/**/*.test.js",
     "test:coverage": "nyc yarn test",
-    "prepublish": "yarn lint && yarn test && yarn build"
+    "prepublish": "yarn lint && yarn test && yarn build",
+    "postpublish": "rm client.js client.js.map"
   },
   "dependencies": {
     "@babel/core": "7.1.2",

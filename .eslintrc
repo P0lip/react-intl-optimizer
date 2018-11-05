@@ -5,6 +5,7 @@
   },
   "extends": "airbnb-base",
   "rules": {
+    "func-names": "off",
     "no-param-reassign": "warn",
     "no-restricted-syntax": "off",
     "function-paren-newline": "off",
@@ -13,7 +14,8 @@
     "global-require": "warn",
     "no-continue": "off",
     "no-labels": "off",
-    "no-label-var": "off"
+    "no-label-var": "off",
+    "no-void": "off"
   },
   "overrides": [
     {
@@ -31,6 +33,12 @@
       "rules": {
         "no-unused-expressions": 0,
         "chai-friendly/no-unused-expressions": 2
+      }
+    },
+    {
+      "files": ["src/client/*.js"],
+      "env": {
+        "browser": true
       }
     }
   ]
