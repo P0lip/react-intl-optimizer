@@ -1,0 +1,34 @@
+{
+  "en": {
+    "cancel": "Cancel",
+    "abort": "Abort",
+    "continue": "Continue",
+    "delete": "Delete",
+    "send_now": "Send now",
+    "send_later": "Send later",
+    "bad_request": "Bad request",
+    "forbidden": "Forbidden",
+    "not_found": "Not found",
+    "missing": "Not found",
+    "error_404": "Not found",
+    "first_name": "First name",
+    "last_name": "Last name",
+    "hello": "Hello"
+  },
+  "pl": {
+    "cancel": "Anuluj",
+    "abort": "Wstrzymaj",
+    "delete": "Usuń",
+    "send_now": "Wyślij teraz",
+    "send_later": "Wyślij później",
+    "bad_request": "Bad request",
+    "forbidden": "Forbidden",
+    "not_found": "Nie znaleziono",
+    "missing": "Nie znaleziono",
+    "error_404": "Nie znaleziono",
+    "first_name": "Imię",
+    "last_name": "Nazwisko",
+    "hello": "Witaj"
+  },
+  "nl": {}
+}
